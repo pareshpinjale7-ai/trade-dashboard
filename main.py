@@ -8,16 +8,7 @@ CACHE = {
 }
 from fo_stocks import FO_STOCKS
  {
-    "RELIANCE": 2885,
-    "TCS": 11536,
-    "INFY": 1594,
-    "HDFCBANK": 1333,
-    "ICICIBANK": 4963,
-    "SBIN": 3045,
-    "AXISBANK": 5900,
-    "LT": 11483,
-    "ITC": 1660,
-    "BAJFINANCE": 317
+    
 }
 INDEX_STOCKS = {
     "RELIANCE": 2885,
