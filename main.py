@@ -349,7 +349,7 @@ def snapshot():
 
 from fastapi.responses import HTMLResponse
 
-@app.get("/pro-dashboard", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
 def pro_dashboard():
 
     html = """
