@@ -347,8 +347,11 @@ def snapshot():
 
     return data
 
+from fastapi.responses import HTMLResponse
+
 @app.get("/pro-dashboard", response_class=HTMLResponse)
 def pro_dashboard():
+
     html = """
 <!DOCTYPE html>
 <html>
@@ -357,19 +360,20 @@ def pro_dashboard():
 <title>Trade Dashboard</title>
 <meta http-equiv="refresh" content="10">
 <style>
-body { background:#0b1220; color:#e5e7eb; font-family:Inter, Arial; }
+body { background:#0b1220; color:#e5e7eb; font-family:Arial }
 .container { width:92%; margin:auto; }
 h1 { text-align:center; margin:20px 0; }
 .grid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
-.card { background:#111827; border-radius:14px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.3); }
-table { width:100%; border-collapse:collapse; }
-th, td { padding:10px; border-bottom:1px solid #1f2937; text-align:center; }
-th { background:#0f172a; }
-.badge { padding:4px 10px; border-radius:999px; font-weight:600; }
-.green { background:#064e3b; color:#34d399; }
-.red { background:#3f1d1d; color:#f87171; }
+.card { background:#111827; border-radius:14px; padding:16px; }
+table { width:100%; border-collapse:collapse }
+th, td { padding:10px; border-bottom:1px solid #1f2937; text-align:center }
+th { background:#0f172a }
+.badge { padding:4px 10px; border-radius:999px; font-weight:600 }
+.green { background:#064e3b; color:#34d399 }
+.red { background:#3f1d1d; color:#f87171 }
 </style>
 </head>
+
 <body>
 <div class="container">
 <h1>🔥 Trade Dashboard</h1>
@@ -396,7 +400,6 @@ async function load(){
   const r = await fetch('/snapshot');
   const d = await r.json();
 
-  // Market Pulse
   let mp = `<table><tr><th>Symbol</th><th>Price</th><th>Volume</th><th>Status</th></tr>`;
   d.market_pulse.forEach(x=>{
     mp += `<tr><td>${x.symbol}</td><td>${x.last_price}</td><td>${x.volume}</td>
@@ -405,7 +408,6 @@ async function load(){
   mp += `</table>`;
   document.getElementById('mp').innerHTML = mp;
 
-  // Index Mover
   let im = `<table><tr><th>Symbol</th><th>Change %</th><th>Impact</th></tr>`;
   d.index_mover.forEach(x=>{
     const cls = x.impact_score >= 0 ? 'green':'red';
@@ -415,23 +417,20 @@ async function load(){
   im += `</table>`;
   document.getElementById('im').innerHTML = im;
 
-  // F&O
-let fo = `<table><tr>
-<th>Symbol</th><th>Price</th><th>Volume</th><th>Strength</th>
-</tr>`;
+  let fo = `<table><tr><th>Symbol</th><th>Price</th><th>Volume</th><th>Strength</th></tr>`;
+  d.fo_scanner.forEach(x=>{
+    let label = x.score == 3
+      ? '<span class="badge green">STRONG</span>'
+      : '<span class="badge">MEDIUM</span>';
 
-d.fo_scanner.forEach(x=>{
-  let label = x.score == 3 
-    ? '<span class="badge green">STRONG</span>' 
-    : '<span class="badge">MEDIUM</span>';
-
-  fo += `<tr>
-    <td>${x.symbol}</td>
-    <td>${x.last_price}</td>
-    <td>${x.volume}</td>
-    <td>${label}</td>
-  </tr>`;
-});
-fo += `</table>`;
-document.getElementById('fo').innerHTML = fo;
-
+    fo += `<tr><td>${x.symbol}</td><td>${x.last_price}</td><td>${x.volume}</td><td>${label}</td></tr>`;
+  });
+  fo += `</table>`;
+  document.getElementById('fo').innerHTML = fo;
+}
+load();
+</script>
+</body>
+</html>
+"""
+    return HTMLResponse(content=html)
