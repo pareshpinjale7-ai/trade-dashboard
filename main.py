@@ -57,9 +57,92 @@ ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 
 dhan = dhanhq(CLIENT_ID, ACCESS_TOKEN)
 
-@app.get("/")
-def home():
-    return {"status": "Trade App Running"}
+@app.get("/", response_class=HTMLResponse)
+def pro_dashboard():
+    html = """
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Trade Dashboard</title>
+<meta http-equiv="refresh" content="10">
+<style>
+body { background:#0b1220; color:#e5e7eb; font-family:Arial }
+.container { width:92%; margin:auto; }
+h1 { text-align:center; margin:20px 0; }
+.grid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+.card { background:#111827; border-radius:14px; padding:16px; }
+table { width:100%; border-collapse:collapse }
+th, td { padding:10px; border-bottom:1px solid #1f2937; text-align:center }
+th { background:#0f172a }
+.badge { padding:4px 10px; border-radius:999px; font-weight:600 }
+.green { background:#064e3b; color:#34d399 }
+.red { background:#3f1d1d; color:#f87171 }
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>🔥 Trade Dashboard</h1>
+
+<div class="grid">
+  <div class="card">
+    <h3>Market Pulse</h3>
+    <div id="mp"></div>
+  </div>
+  <div class="card">
+    <h3>Index Mover</h3>
+    <div id="im"></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <h3>F&O Scanner (Top 10)</h3>
+  <div id="fo"></div>
+</div>
+</div>
+
+<script>
+async function load(){
+  const r = await fetch('/snapshot');
+  const d = await r.json();
+
+  let mp = `<table><tr><th>Symbol</th><th>Price</th><th>Volume</th><th>Status</th></tr>`;
+  d.market_pulse.forEach(x=>{
+    mp += `<tr><td>${x.symbol}</td><td>${x.last_price}</td><td>${x.volume}</td>
+           <td><span class="badge green">ACTIVE</span></td></tr>`;
+  });
+  mp += `</table>`;
+  document.getElementById('mp').innerHTML = mp;
+
+  let im = `<table><tr><th>Symbol</th><th>Change %</th><th>Impact</th></tr>`;
+  d.index_mover.forEach(x=>{
+    const cls = x.impact_score >= 0 ? 'green':'red';
+    im += `<tr><td>${x.symbol}</td><td>${x["change_%"]}</td>
+           <td><span class="badge ${cls}">${x.impact_score}</span></td></tr>`;
+  });
+  im += `</table>`;
+  document.getElementById('im').innerHTML = im;
+
+  let fo = `<table><tr><th>Symbol</th><th>Price</th><th>Volume</th><th>Strength</th></tr>`;
+  d.fo_scanner.forEach(x=>{
+    let label = x.score == 3
+      ? '<span class="badge green">STRONG</span>'
+      : '<span class="badge">MEDIUM</span>';
+
+    fo += `<tr><td>${x.symbol}</td><td>${x.last_price}</td><td>${x.volume}</td><td>${label}</td></tr>`;
+  });
+  fo += `</table>`;
+  document.getElementById('fo').innerHTML = fo;
+}
+load();
+</script>
+</body>
+</html>
+"""
+    return HTMLResponse(content=html)
+
+
 
 @app.get("/quote/{security_id}")
 def get_quote(security_id: int):
