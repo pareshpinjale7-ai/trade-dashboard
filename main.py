@@ -151,8 +151,8 @@ def scan_market_pulse():
             print(f"Error in {name} ({sid}): {e}")
 
     return results
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard():
+@app.get("/", response_class=HTMLResponse)
+def dashboard_root():
 
     results = []
 
@@ -350,7 +350,7 @@ def snapshot():
 from fastapi.responses import HTMLResponse
 
 @app.get("/", response_class=HTMLResponse)
-def pro_dashboard():
+def dashboard_root():
 
     html = """
 <!DOCTYPE html>
